@@ -59,7 +59,7 @@ public class GameEngine {
 
         // Load Scene
         scene = new Scene(this);
-        scene.loadFromFile(R.raw.mini);
+        scene.loadFromFile(R.raw.ncscene);
 
         // Create Bonk
         bonk = new Bonk(this, 100, 0);
