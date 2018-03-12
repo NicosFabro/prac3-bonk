@@ -32,7 +32,7 @@ WALLS  = [#]/
 WATER  = 18,23,24,25
 
 COIN   = 16,2
-COIN   = 18,11
+COIN   = 23,6
 COIN   = 5,8
 COIN   = 5,9
 COIN   = 5,10
@@ -45,4 +45,4 @@ COIN   = 5,16
 COIN   = 5,17
 COIN   = 5,18
 BOX    = 28,4
-CRAB   = 21,25,4
+CRAB   = 21,26,4
