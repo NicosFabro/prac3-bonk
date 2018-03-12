@@ -62,7 +62,11 @@ public class GameEngine {
         scene.loadFromFile(R.raw.ncscene);
 
         // Create Bonk
-        bonk = new Bonk(this, scene.spawnX, scene.spawnY);
+        if (scene.spawnX != 0 && scene.spawnY != 0) {
+            bonk = new Bonk(this, scene.spawnX, scene.spawnY);
+        } else {
+            bonk = new Bonk(this, 100, 0);
+        }
 
         // Program the Handler for engine refresh (physics et al)
         handler = new Handler();
