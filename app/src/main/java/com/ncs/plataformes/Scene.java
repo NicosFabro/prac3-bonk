@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ncs.plataformes.characters.Box;
 import com.ncs.plataformes.characters.Coin;
 import com.ncs.plataformes.characters.Crab;
 import com.ncs.plataformes.characters.Enemy;
@@ -29,6 +30,7 @@ public class Scene {
 
     private List<Coin> coins;
     private List<Enemy> enemies;
+    private List<Box> boxes;
 
     Scene(GameEngine gameEngine) {
         this.gameEngine = gameEngine;
@@ -37,6 +39,7 @@ public class Scene {
         WATERLEVEL = 999;
         coins = new ArrayList<>();
         enemies = new ArrayList<>();
+        boxes = new ArrayList<>();
     }
 
     void loadFromFile(int resource) {
@@ -90,6 +93,14 @@ public class Scene {
                         Coin coin = new Coin(gameEngine, coinX, coinY);
                         coins.add(coin);
                         break;
+                    case "BOX":
+                        parts2 = args.split(",");
+                        if (parts2.length != 2) continue;
+                        int boxX = Integer.parseInt(parts2[0].trim()) * 16;
+                        int boxY = Integer.parseInt(parts2[1].trim()) * 16;
+                        Box box = new Box(gameEngine, boxX, boxY);
+                        boxes.add(box);
+                        break;
                     case "CRAB":
                         parts2 = args.split(",");
                         if (parts2.length != 3) continue;
@@ -141,6 +152,7 @@ public class Scene {
 
         for(Coin coin : coins) coin.physics(delta);
         for(Enemy enemy : enemies) enemy.physics(delta);
+        for(Box box : boxes) box.physics(delta);
 
     }
 
@@ -178,6 +190,7 @@ public class Scene {
 
         for(Coin coin : coins) coin.draw(canvas);
         for(Enemy enemy : enemies) enemy.draw(canvas);
+        for(Box box : boxes) box.draw(canvas);
 
     }
 }
