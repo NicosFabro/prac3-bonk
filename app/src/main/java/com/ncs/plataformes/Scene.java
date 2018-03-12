@@ -32,6 +32,9 @@ public class Scene {
     private List<Enemy> enemies;
     private List<Box> boxes;
 
+    public int spawnX;
+    public int spawnY;
+
     Scene(GameEngine gameEngine) {
         this.gameEngine = gameEngine;
         paint = new Paint();
@@ -110,6 +113,11 @@ public class Scene {
                         Crab crab = new Crab(gameEngine, crabX0, crabX1, crabY);
                         enemies.add(crab);
                         break;
+                    case "SPAWN":
+                        parts2 = args.split(",");
+                        if (parts2.length != 2) continue;
+                        this.spawnX = Integer.parseInt(parts2[0]);
+                        this.spawnY = Integer.parseInt(parts2[1]);
                 }
             }
             scene = lines.toArray(new String[0]);
