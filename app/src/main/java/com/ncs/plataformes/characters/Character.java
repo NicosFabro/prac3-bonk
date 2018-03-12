@@ -46,7 +46,7 @@ abstract public class Character {
         updateCollisionRect();
     }
 
-    Rect getCollisionRect() {
+    public Rect getCollisionRect() {
         return collisionRect;
     }
 

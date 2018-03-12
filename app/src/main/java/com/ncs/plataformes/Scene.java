@@ -3,6 +3,7 @@ package com.ncs.plataformes;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.widget.Toast;
 
@@ -13,6 +14,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ncs.plataformes.characters.Bonk;
 import com.ncs.plataformes.characters.Box;
 import com.ncs.plataformes.characters.Coin;
 import com.ncs.plataformes.characters.Crab;
@@ -28,18 +30,23 @@ public class Scene {
     private String GROUND, WALLS;
     private int WATERLEVEL, SKY, WATERSKY, WATER;
 
+    private Bonk bonk;
+
     private List<Coin> coins;
     private List<Enemy> enemies;
     private List<Box> boxes;
 
-    public int spawnX;
-    public int spawnY;
+    int spawnX;
+    int spawnY;
+
+    int score;
 
     Scene(GameEngine gameEngine) {
         this.gameEngine = gameEngine;
         paint = new Paint();
         CHARS = new SparseIntArray();
         WATERLEVEL = 999;
+        score = 0;
         coins = new ArrayList<>();
         enemies = new ArrayList<>();
         boxes = new ArrayList<>();
@@ -66,7 +73,7 @@ public class Scene {
                         break;
                     case "CHARS":
                         parts2 = args.split(" ");
-                        for(String def : parts2) {
+                        for (String def : parts2) {
                             String[] item = def.split("=");
                             if (item.length != 2) continue;
                             char c = item[0].trim().charAt(0);
@@ -124,9 +131,8 @@ public class Scene {
             reader.close();
             sceneHeight = scene.length;
             sceneWidth = scene[0].length();
-        }
-        catch (IOException e) {
-            Toast.makeText(gameEngine.getContext(), "Error loading scene:" +  e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Toast.makeText(gameEngine.getContext(), "Error loading scene:" + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -148,19 +154,44 @@ public class Scene {
         return (WALLS.indexOf(sc) != -1);
     }
 
-    public int getSceneWidth() { return sceneWidth; }
-    public int getSceneHeight() { return sceneHeight; }
-    public int getWaterLevel() { return WATERLEVEL; }
+    public int getSceneWidth() {
+        return sceneWidth;
+    }
 
-    public int getWidth() { return sceneWidth * 16; }
-    public int getHeight() { return sceneHeight * 16; }
+    public int getSceneHeight() {
+        return sceneHeight;
+    }
+
+    public int getWaterLevel() {
+        return WATERLEVEL;
+    }
+
+    public int getWidth() {
+        return sceneWidth * 16;
+    }
+
+    public int getHeight() {
+        return sceneHeight * 16;
+    }
 
     // Scene physics
     void physics(int delta) {
 
-        for(Coin coin : coins) coin.physics(delta);
-        for(Enemy enemy : enemies) enemy.physics(delta);
-        for(Box box : boxes) box.physics(delta);
+        bonk = gameEngine.getBonk();
+
+        for (Coin coin : coins) coin.physics(delta);
+        for (Enemy enemy : enemies) enemy.physics(delta);
+        for (Box box : boxes) box.physics(delta);
+
+        for (int i = coins.size() - 1; i >= 0; i--) {
+            Coin coin = coins.get(i);
+            if (bonk.getCollisionRect().intersect(coin.getCollisionRect())) {
+                gameEngine.getAudio().coin();
+                coins.remove(coin);
+                score += 10;
+                Log.d("ncs", "Score: " + score);
+            }
+        }
 
     }
 
@@ -175,7 +206,7 @@ public class Scene {
         int b = Math.min(scene.length, offsetY / 16 + screenHeight / 16 + 2);
 
         // Do the x-y loops over the visible scene
-        for(int y = t; y < b; y++) {
+        for (int y = t; y < b; y++) {
 
             // Compute the background index (sky / water)
             int bgIdx = SKY;
@@ -183,7 +214,7 @@ public class Scene {
             else if (y > WATERLEVEL) bgIdx = WATER;
             Bitmap bgBitmap = gameEngine.getBitmap(bgIdx);
 
-            for(int x = l; x < r; x++) {
+            for (int x = l; x < r; x++) {
                 // Draw the background tile
                 canvas.drawBitmap(bgBitmap, x * 16, y * 16, paint);
 
@@ -196,9 +227,9 @@ public class Scene {
             }
         }
 
-        for(Coin coin : coins) coin.draw(canvas);
-        for(Enemy enemy : enemies) enemy.draw(canvas);
-        for(Box box : boxes) box.draw(canvas);
+        for (Coin coin : coins) coin.draw(canvas);
+        for (Enemy enemy : enemies) enemy.draw(canvas);
+        for (Box box : boxes) box.draw(canvas);
 
     }
 }
