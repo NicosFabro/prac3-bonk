@@ -174,6 +174,10 @@ public class Scene {
         return sceneHeight * 16;
     }
 
+    public int getScore() {
+        return score;
+    }
+
     // Scene physics
     void physics(int delta) {
 

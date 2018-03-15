@@ -161,7 +161,7 @@ public class GameEngine {
         return true;
     }
 
-    private Paint paint, paintKeys;
+    private Paint paint, paintKeys, paintScore;
     private int screenWidth, screenHeight, scaledWidth;
     private float scale;
 
@@ -209,6 +209,9 @@ public class GameEngine {
             paint.setTextSize(10);
             paintKeys = new Paint();
             paintKeys.setColor(Color.argb(20, 0, 0, 0));
+            paintScore = new Paint();
+            paintScore.setColor(Color.YELLOW);
+            paintScore.setTextSize(5);
         }
 
         // Refresh scale factor if screen has changed sizes
@@ -247,6 +250,7 @@ public class GameEngine {
         canvas.drawText("»", 28, 92, paint);
         canvas.drawRect(81, 76, 99, 99, paintKeys);
         canvas.drawText("^", 88, 92, paint);
+        canvas.drawText("Score:" + this.scene.getScore(), 1, 10, paintScore);
     }
 
     public Audio getAudio() {
