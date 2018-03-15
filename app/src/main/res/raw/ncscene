@@ -35,6 +35,12 @@ SPAWN  = 18,300
 
 COIN   = 16,2
 COIN   = 23,6
+COIN   = 5,2
+COIN   = 5,3
+COIN   = 5,4
+COIN   = 5,5
+COIN   = 5,6
+COIN   = 5,7
 COIN   = 5,8
 COIN   = 5,9
 COIN   = 5,10
