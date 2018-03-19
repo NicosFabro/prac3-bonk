@@ -3,6 +3,8 @@ package com.ncs.plataformes;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.os.Handler;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.widget.Toast;
@@ -193,24 +195,29 @@ public class Scene {
         for (Enemy enemy : enemies) enemy.physics(delta);
         for (Box box : boxes) box.physics(delta);
 
-        for (int i = coins.size() - 1; i >= 0; i--) {
-            Coin coin = coins.get(i);
-            if (bonk.getCollisionRect().intersect(coin.getCollisionRect())) {
-                gameEngine.getAudio().coin();
-                coins.remove(coin);
-                score += 10;
-                Log.d("ncs", "Score: " + score);
+        Rect bonkRect = bonk.getCollisionRect();
+
+        if (bonkRect != null) {
+
+            for (int i = coins.size() - 1; i >= 0; i--) {
+                Coin coin = coins.get(i);
+                if (bonkRect.intersect(coin.getCollisionRect())) {
+                    gameEngine.getAudio().coin();
+                    coins.remove(coin);
+                    score += 10;
+                    Log.d("ncs", "Score: " + score);
+                }
+            }
+
+            for (Enemy enemy : enemies) {
+                if (bonkRect.intersect(enemy.getCollisionRect())) {
+                    gameEngine.getAudio().die();
+                    bonk.die();
+                    lives--;
+                    Log.d("ncs", "Lives: " + lives);
+                }
             }
         }
-
-        for (Enemy enemy : enemies) {
-            if (bonk.getCollisionRect().intersect(enemy.getCollisionRect())) {
-                gameEngine.getAudio().die();
-                lives--;
-                Log.d("ncs", "Lives: " + lives);
-            }
-        }
-
     }
 
     // Scene draw
