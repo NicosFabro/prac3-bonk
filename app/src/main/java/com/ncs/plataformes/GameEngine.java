@@ -140,6 +140,7 @@ public class GameEngine {
 
         if (act == MotionEvent.ACTION_DOWN && bonk.isDead()) {
             spawn();
+            resume();
         }
         return true;
     }
@@ -169,7 +170,7 @@ public class GameEngine {
         return true;
     }
 
-    private Paint paint, paintKeys, paintScore, paintLives, paintDeadDialog, paintDeadRect;
+    private Paint paint, paintKeys, paintScore, paintLives, paintDeadDialog, paintDeadRect, paintGameOver;
     private int screenWidth, screenHeight, scaledWidth;
     private float scale;
 
@@ -227,6 +228,7 @@ public class GameEngine {
             paintDeadDialog.setTextSize(7);
             paintDeadRect = new Paint(paintKeys);
             paintDeadRect.setColor(Color.argb(90, 0, 0, 0));
+            paintGameOver = new Paint(paintDeadDialog);
         }
 
         // Refresh scale factor if screen has changed sizes
@@ -266,15 +268,22 @@ public class GameEngine {
         canvas.drawRect(81, 76, 99, 99, paintKeys);
         canvas.drawText("^", 88, 92, paint);
 
-        if (bonk.isDead()) {
+        if (bonk.isDead() && scene.getLives() != 0) {
             pause();
             String strDead = "You died";
             String strRespawn = "Touch to respawn";
             canvas.drawRect(10, 30, 90, 70, paintDeadRect);
             canvas.drawText(strDead, 50 - paintDeadDialog.measureText(strDead) / 2, 50, paintDeadDialog);
-            canvas.drawText(strRespawn, 50 - paintDeadDialog.measureText(strRespawn) / 2, 55, paintDeadDialog);
+            canvas.drawText(strRespawn, 50 - paintDeadDialog.measureText(strRespawn) / 2, 60, paintDeadDialog);
+        }
 
-
+        if (scene.getLives() == 0) {
+            stop();
+            String strDead = "GAME OVER";
+            String strRespawn = "No lives left";
+            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
+            canvas.drawText(strDead, 50 - paintGameOver.measureText(strDead) / 2, 50, paintGameOver);
+            canvas.drawText(strRespawn, 50 - paintGameOver.measureText(strRespawn) / 2, 60, paintGameOver);
         }
 
         // Score and Lives
