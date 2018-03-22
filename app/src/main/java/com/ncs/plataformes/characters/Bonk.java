@@ -8,18 +8,22 @@ import com.ncs.plataformes.Scene;
 
 public class Bonk extends Character {
 
-    private static final int[][] ANIMATIONS = new int[][] {
-            { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 14, 14, 14, 14, 13 }, // 0: standing by
-            { 6, 7, 8, 9 },                         // 1: walking left
-            { 0, 1, 2, 3 },                         // 2: walking right
-            { 47, 48, 49, 50, 51, 50, 49, 48 },     // 3: dead
-            { 10 },                                 // 4: Jumping left
-            { 4 },                                  // 5: Jumping right
-            { 11 },                                 // 6: Falling left
-            { 5 },                                  // 7: Falling right
-            { 15 } ,                                // 8: Jumping/falling front
+    private static final int[][] ANIMATIONS = new int[][]{
+            {12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 14, 14, 14, 14, 13}, // 0: standing by
+            {6, 7, 8, 9},                         // 1: walking left
+            {0, 1, 2, 3},                         // 2: walking right
+            {47, 48, 49, 50, 51, 50, 49, 48},     // 3: dead
+            {10},                                 // 4: Jumping left
+            {4},                                  // 5: Jumping right
+            {11},                                 // 6: Falling left
+            {5},                                  // 7: Falling right
+            {15},                                // 8: Jumping/falling front
     };
-    @Override int[][] getAnimations() { return ANIMATIONS; }
+
+    @Override
+    int[][] getAnimations() {
+        return ANIMATIONS;
+    }
 
     private static final int[] NEW_STATES = {
             4, 8, 5,
@@ -37,6 +41,8 @@ public class Bonk extends Character {
     private static final int PAD_TOP = 0;
     private static final int COL_WIDTH = 20;
     private static final int COL_HEIGHT = 32;
+
+    private boolean isDead;
 
     public Bonk(GameEngine gameEngine, int x, int y) {
         super(gameEngine, x, y);
@@ -57,10 +63,15 @@ public class Bonk extends Character {
 
     public void die() {
         changeState(3);
+        isDead = true;
     }
 
+    public boolean isDead() {
+        return isDead;
+    }
 
-    @Override void updatePhysics(int delta) {
+    @Override
+    void updatePhysics(int delta) {
 
         // If died, no physics
         if (state == 3) return;
@@ -70,8 +81,7 @@ public class Bonk extends Character {
         Input input = gameEngine.getInput();
         if (input.isLeft()) {
             vx = -this.vx;
-        }
-        else if (input.isRight()) {
+        } else if (input.isRight()) {
             vx = this.vx;
         }
         if (input.isJump()) {
@@ -81,7 +91,9 @@ public class Bonk extends Character {
             }
             input.clearJump();
         }
-        if (input.isKeyboard()) { input.setKeyboard(false); }
+        if (input.isKeyboard()) {
+            input.setKeyboard(false);
+        }
 
         // Apply physics and tests to scene walls and grounds
         Scene scene = gameEngine.getScene();
@@ -115,7 +127,8 @@ public class Bonk extends Character {
 
         // 3) detect ground
         // physics (try fall and detect ground)
-        vy++; if (vy > MAX_VELOCITY) vy = MAX_VELOCITY;
+        vy++;
+        if (vy > MAX_VELOCITY) vy = MAX_VELOCITY;
         newY = y + vy;
         if (vy >= 0) {
             int c1 = (newX + PAD_LEFT) / 16;
@@ -159,7 +172,8 @@ public class Bonk extends Character {
         changeState(NEW_STATES[r * 3 + c]);
     }
 
-    @Override void updateCollisionRect() {
+    @Override
+    void updateCollisionRect() {
         collisionRect.set(
                 x + PAD_LEFT,
                 y + PAD_TOP,
@@ -167,7 +181,9 @@ public class Bonk extends Character {
                 y + PAD_TOP + COL_HEIGHT
         );
     }
-    @Override public Rect getCollisionRect() {
+
+    @Override
+    public Rect getCollisionRect() {
         return (state == 3) ? null : collisionRect;
     }
 }

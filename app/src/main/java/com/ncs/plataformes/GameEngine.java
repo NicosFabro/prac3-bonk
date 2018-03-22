@@ -62,11 +62,7 @@ public class GameEngine {
         scene.loadFromFile(R.raw.ncscene);
 
         // Create Bonk
-        if (scene.spawnX != 0 && scene.spawnY != 0) {
-            bonk = new Bonk(this, scene.spawnX, scene.spawnY);
-        } else {
-            bonk = new Bonk(this, 100, 0);
-        }
+        spawn();
 
         // Program the Handler for engine refresh (physics et al)
         handler = new Handler();
@@ -90,6 +86,14 @@ public class GameEngine {
             }
         };
         handler.postDelayed(runnable, UPDATE_DELAY);
+    }
+
+    private void spawn() {
+        if (scene.spawnX != 0 && scene.spawnY != 0) {
+            bonk = new Bonk(this, scene.spawnX, scene.spawnY);
+        } else {
+            bonk = new Bonk(this, 100, 0);
+        }
     }
 
     // For activity start
@@ -133,6 +137,11 @@ public class GameEngine {
         } else {
             if (down) input.pause();                    // DEAD-ZONE
         }
+
+        if (act == MotionEvent.ACTION_DOWN && bonk.isDead()) {
+            spawn();
+            resume();
+        }
         return true;
     }
 
@@ -161,7 +170,7 @@ public class GameEngine {
         return true;
     }
 
-    private Paint paint, paintKeys, paintScore;
+    private Paint paint, paintKeys, paintScore, paintLives, paintDeadDialog, paintDeadRect, paintGameOver;
     private int screenWidth, screenHeight, scaledWidth;
     private float scale;
 
@@ -212,6 +221,14 @@ public class GameEngine {
             paintScore = new Paint();
             paintScore.setColor(Color.YELLOW);
             paintScore.setTextSize(5);
+            paintLives = new Paint(paintScore);
+            paintLives.setColor(Color.RED);
+            paintDeadDialog = new Paint(paintScore);
+            paintDeadDialog.setColor(Color.WHITE);
+            paintDeadDialog.setTextSize(7);
+            paintDeadRect = new Paint(paintKeys);
+            paintDeadRect.setColor(Color.argb(90, 0, 0, 0));
+            paintGameOver = new Paint(paintDeadDialog);
         }
 
         // Refresh scale factor if screen has changed sizes
@@ -250,7 +267,28 @@ public class GameEngine {
         canvas.drawText("»", 28, 92, paint);
         canvas.drawRect(81, 76, 99, 99, paintKeys);
         canvas.drawText("^", 88, 92, paint);
-        canvas.drawText("Score:" + this.scene.getScore(), 1, 10, paintScore);
+
+        if (bonk.isDead() && scene.getLives() != 0) {
+            pause();
+            String strDead = "You died";
+            String strRespawn = "Touch to respawn";
+            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
+            canvas.drawText(strDead, 50 - paintDeadDialog.measureText(strDead) / 2, 50, paintDeadDialog);
+            canvas.drawText(strRespawn, 50 - paintDeadDialog.measureText(strRespawn) / 2, 60, paintDeadDialog);
+        }
+
+        if (scene.getLives() == 0) {
+            stop();
+            String strDead = "GAME OVER";
+            String strRespawn = "No lives left";
+            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
+            canvas.drawText(strDead, 50 - paintGameOver.measureText(strDead) / 2, 50, paintGameOver);
+            canvas.drawText(strRespawn, 50 - paintGameOver.measureText(strRespawn) / 2, 60, paintGameOver);
+        }
+
+        // Score and Lives
+        canvas.drawText("Score: " + this.scene.getScore(), 1, 5, paintScore);
+        canvas.drawText("Lives: " + this.scene.getLives(), 1, 10, paintLives);
     }
 
     public Audio getAudio() {
