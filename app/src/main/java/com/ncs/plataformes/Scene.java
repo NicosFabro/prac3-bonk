@@ -217,6 +217,12 @@ public class Scene {
                     Log.d("ncs", "Lives: " + lives);
                 }
             }
+
+            for (Box box : boxes) {
+                if (bonkRect.intersect(box.getCollisionRect())) {
+                    gameEngine.win();
+                }
+            }
         }
     }
 

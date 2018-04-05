@@ -26,6 +26,8 @@ public class GameEngine {
     private Bonk bonk;
     private Input input;
 
+    private boolean hasWon;
+
     public Bonk getBonk() {
         return bonk;
     }
@@ -114,6 +116,11 @@ public class GameEngine {
     // For activity resume
     void resume() {
         audio.startMusic();
+    }
+
+    public void win() {
+        this.stop();
+        hasWon = true;
     }
 
     // Attend user input
@@ -271,7 +278,7 @@ public class GameEngine {
         if (bonk.isDead() && scene.getLives() != 0) {
             pause();
             String strDead = "You died";
-            String strRespawn = "Touch to respawn";
+            String strRespawn = "Tap to respawn";
             canvas.drawRect(10, 30, 90, 70, paintDeadRect);
             canvas.drawText(strDead, 50 - paintDeadDialog.measureText(strDead) / 2, 50, paintDeadDialog);
             canvas.drawText(strRespawn, 50 - paintDeadDialog.measureText(strRespawn) / 2, 60, paintDeadDialog);
@@ -281,6 +288,15 @@ public class GameEngine {
             stop();
             String strDead = "GAME OVER";
             String strRespawn = "No lives left";
+            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
+            canvas.drawText(strDead, 50 - paintGameOver.measureText(strDead) / 2, 50, paintGameOver);
+            canvas.drawText(strRespawn, 50 - paintGameOver.measureText(strRespawn) / 2, 60, paintGameOver);
+        }
+
+        if (hasWon) {
+            win();
+            String strDead = "YOU WIN";
+            String strRespawn = "Tap to the next scene";
             canvas.drawRect(10, 30, 90, 70, paintDeadRect);
             canvas.drawText(strDead, 50 - paintGameOver.measureText(strDead) / 2, 50, paintGameOver);
             canvas.drawText(strRespawn, 50 - paintGameOver.measureText(strRespawn) / 2, 60, paintGameOver);
