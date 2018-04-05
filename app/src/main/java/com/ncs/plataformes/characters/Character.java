@@ -25,6 +25,10 @@ abstract public class Character {
         return state;
     }
 
+    public Paint getPaint() {
+        return paint;
+    }
+
     public Character(GameEngine gameEngine, int x, int y) {
         this.gameEngine = gameEngine;
         this.x = x;
