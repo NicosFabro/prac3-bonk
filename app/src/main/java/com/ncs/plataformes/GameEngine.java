@@ -162,14 +162,14 @@ public class GameEngine {
             resume();
         }
 
-        if (act == MotionEvent.ACTION_DOWN && hasWon) {
-            hasWon = false;
+        if (act == MotionEvent.ACTION_DOWN && hasWon)
             changeMap();
-        }
+
         return true;
     }
 
     private void changeMap() {
+        hasWon = false;
         if (!scenes.isEmpty()) {
             scene = new Scene(this);
             scene.loadFromFile(scenes.remove(0));
