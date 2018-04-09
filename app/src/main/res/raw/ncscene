@@ -31,7 +31,7 @@ GROUND = <->[#]/
 WALLS  = [#]/
 WATER  = 18,23,24,25
 
-SPAWN  = 18,300
+SPAWN  = 2,23
 
 COIN   = 16,2
 COIN   = 23,6

@@ -127,8 +127,9 @@ public class Scene {
                     case "SPAWN":
                         parts2 = args.split(",");
                         if (parts2.length != 2) continue;
-                        this.spawnX = Integer.parseInt(parts2[0]);
-                        this.spawnY = Integer.parseInt(parts2[1]);
+                        this.spawnX = Integer.parseInt(parts2[0]) * 16;
+                        this.spawnY = Integer.parseInt(parts2[1]) * 16;
+                        break;
                 }
             }
             scene = lines.toArray(new String[0]);
