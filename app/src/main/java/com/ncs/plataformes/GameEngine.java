@@ -6,10 +6,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import com.ncs.plataformes.characters.Bonk;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameEngine {
 
@@ -25,6 +29,10 @@ public class GameEngine {
     private Scene scene;
     private Bonk bonk;
     private Input input;
+
+    private List<Integer> scenes;
+
+    private boolean hasWon;
 
     public Bonk getBonk() {
         return bonk;
@@ -59,7 +67,13 @@ public class GameEngine {
 
         // Load Scene
         scene = new Scene(this);
-        scene.loadFromFile(R.raw.ncscene);
+        scenes = new ArrayList<>();
+        scenes.add(R.raw.ncscene);
+        scenes.add(R.raw.mini);
+        scenes.add(R.raw.scene);
+        scenes.add(R.raw.scene2);
+        scenes.add(R.raw.last_map);
+        scene.loadFromFile(scenes.remove(0));
 
         // Create Bonk
         spawn();
@@ -116,6 +130,11 @@ public class GameEngine {
         audio.startMusic();
     }
 
+    public void win() {
+        this.stop();
+        hasWon = true;
+    }
+
     // Attend user input
     boolean onTouchEvent(MotionEvent motionEvent) {
         if (screenHeight * screenWidth == 0) return true;
@@ -142,7 +161,22 @@ public class GameEngine {
             spawn();
             resume();
         }
+
+        if (act == MotionEvent.ACTION_DOWN && hasWon) {
+            hasWon = false;
+            changeMap();
+        }
         return true;
+    }
+
+    private void changeMap() {
+        if (!scenes.isEmpty()) {
+            scene = new Scene(this);
+            scene.loadFromFile(scenes.remove(0));
+        } else {
+            Log.d("ncs", "changeMap: No more scenes");
+        }
+        spawn();
     }
 
     // Testing with keyboard
@@ -271,7 +305,7 @@ public class GameEngine {
         if (bonk.isDead() && scene.getLives() != 0) {
             pause();
             String strDead = "You died";
-            String strRespawn = "Touch to respawn";
+            String strRespawn = "Tap to respawn";
             canvas.drawRect(10, 30, 90, 70, paintDeadRect);
             canvas.drawText(strDead, 50 - paintDeadDialog.measureText(strDead) / 2, 50, paintDeadDialog);
             canvas.drawText(strRespawn, 50 - paintDeadDialog.measureText(strRespawn) / 2, 60, paintDeadDialog);
@@ -284,6 +318,15 @@ public class GameEngine {
             canvas.drawRect(10, 30, 90, 70, paintDeadRect);
             canvas.drawText(strDead, 50 - paintGameOver.measureText(strDead) / 2, 50, paintGameOver);
             canvas.drawText(strRespawn, 50 - paintGameOver.measureText(strRespawn) / 2, 60, paintGameOver);
+        }
+
+        if (hasWon) {
+            win();
+            String strWin = "YOU WIN";
+            String strScore = "Your score is: " + this.scene.getScore() + " points";
+            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
+            canvas.drawText(strWin, 50 - paintGameOver.measureText(strWin) / 2, 50, paintGameOver);
+            canvas.drawText(strScore, 50 - paintGameOver.measureText(strScore) / 2, 60, paintGameOver);
         }
 
         // Score and Lives
