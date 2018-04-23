@@ -1,5 +1,6 @@
 package com.ncs.plataformes;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -53,6 +54,8 @@ public class GameEngine {
     public Input getInput() {
         return input;
     }
+
+    boolean isPause = false;
 
     GameEngine(Context context, GameView gameView) {
         // Initialize everything
@@ -123,11 +126,14 @@ public class GameEngine {
     // For activity pause
     void pause() {
         audio.stopMusic();
+        physics(0);
+        isPause = true;
     }
 
     // For activity resume
     void resume() {
         audio.startMusic();
+        isPause = false;
     }
 
     public void win() {
@@ -153,6 +159,8 @@ public class GameEngine {
             else input.goRight();                       // RIGHT
         } else if ((y > 75) && (x > 80)) {
             if (down) input.jump();                     // JUMP
+        } else if ((y < 20) && (x > 80)) {
+            if (down) this.pause();                     // PAUSE
         } else {
             if (down) input.pause();                    // DEAD-ZONE
         }
@@ -210,12 +218,13 @@ public class GameEngine {
 
     // Perform physics on all game objects
     private void physics(int delta) {
-        // Player physics
-        bonk.physics(delta);
+        if (!isPause) {
+            // Player physics
+            bonk.physics(delta);
 
-        // Other game objects' physics
-        scene.physics(delta);
-
+            // Other game objects' physics
+            scene.physics(delta);
+        }
         // ... and update scrolling
         updateOffsets();
     }
@@ -301,6 +310,8 @@ public class GameEngine {
         canvas.drawText("»", 28, 92, paint);
         canvas.drawRect(81, 76, 99, 99, paintKeys);
         canvas.drawText("^", 88, 92, paint);
+        canvas.drawRect(81, 1, 99, 20, paintKeys);
+        canvas.drawText("||", 87, 12, paint);
 
         if (bonk.isDead() && scene.getLives() != 0) {
             pause();
@@ -322,6 +333,14 @@ public class GameEngine {
 
         if (hasWon) {
             win();
+            String strWin = "YOU WIN";
+            String strScore = "Your score is: " + this.scene.getScore() + " points";
+            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
+            canvas.drawText(strWin, 50 - paintGameOver.measureText(strWin) / 2, 50, paintGameOver);
+            canvas.drawText(strScore, 50 - paintGameOver.measureText(strScore) / 2, 60, paintGameOver);
+        }
+
+        if (isPause) {
             String strWin = "YOU WIN";
             String strScore = "Your score is: " + this.scene.getScore() + " points";
             canvas.drawRect(10, 30, 90, 70, paintDeadRect);
