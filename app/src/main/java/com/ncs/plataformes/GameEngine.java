@@ -1,12 +1,13 @@
 package com.ncs.plataformes;
 
-import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -31,9 +32,15 @@ public class GameEngine {
     private Bonk bonk;
     private Input input;
 
+    private int delta = 0;
+
     private List<Integer> scenes;
 
     private boolean hasWon;
+
+    private boolean isPause;
+
+    private AlertDialog.Builder dialogBuilder;
 
     public Bonk getBonk() {
         return bonk;
@@ -54,8 +61,6 @@ public class GameEngine {
     public Input getInput() {
         return input;
     }
-
-    boolean isPause = false;
 
     GameEngine(Context context, GameView gameView) {
         // Initialize everything
@@ -81,6 +86,8 @@ public class GameEngine {
         // Create Bonk
         spawn();
 
+        dialogBuilder = new AlertDialog.Builder(context);
+
         // Program the Handler for engine refresh (physics et al)
         handler = new Handler();
         Runnable runnable = new Runnable() {
@@ -93,13 +100,16 @@ public class GameEngine {
                 // Delta time between calls
                 if (last == 0) last = System.currentTimeMillis();
                 long now = System.currentTimeMillis();
-                int delta = (int) (now - last);
+                delta = (int) (now - last);
                 last = now;
                 physics(delta);
                 if (++count % INVALIDATES_PER_UPDATE == 0) {
                     GameEngine.this.gameView.invalidate();
                     count = 0;
                 }
+
+                if (bonk.isDead() && scene.getLives() != 0) showDieDialog();
+                if (scene.getLives() == 0) showGameOverDialog();
             }
         };
         handler.postDelayed(runnable, UPDATE_DELAY);
@@ -121,18 +131,23 @@ public class GameEngine {
     // For activity stop
     void stop() {
         audio.stopMusic();
+        physics(0);
+        showGameOverDialog();
+        isPause = true;
     }
 
     // For activity pause
     void pause() {
         audio.stopMusic();
         physics(0);
+        showPauseDialog();
         isPause = true;
     }
 
     // For activity resume
     void resume() {
         audio.startMusic();
+        physics(delta);
         isPause = false;
     }
 
@@ -165,10 +180,10 @@ public class GameEngine {
             if (down) input.pause();                    // DEAD-ZONE
         }
 
-        if (act == MotionEvent.ACTION_DOWN && bonk.isDead()) {
-            spawn();
-            resume();
-        }
+//        if (act == MotionEvent.ACTION_DOWN && bonk.isDead()) {
+//            spawn();
+//            resume();
+//        }
 
         if (act == MotionEvent.ACTION_DOWN && hasWon)
             changeMap();
@@ -313,34 +328,8 @@ public class GameEngine {
         canvas.drawRect(81, 1, 99, 20, paintKeys);
         canvas.drawText("||", 87, 12, paint);
 
-        if (bonk.isDead() && scene.getLives() != 0) {
-            pause();
-            String strDead = "You died";
-            String strRespawn = "Tap to respawn";
-            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
-            canvas.drawText(strDead, 50 - paintDeadDialog.measureText(strDead) / 2, 50, paintDeadDialog);
-            canvas.drawText(strRespawn, 50 - paintDeadDialog.measureText(strRespawn) / 2, 60, paintDeadDialog);
-        }
-
-        if (scene.getLives() == 0) {
-            stop();
-            String strDead = "GAME OVER";
-            String strRespawn = "No lives left";
-            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
-            canvas.drawText(strDead, 50 - paintGameOver.measureText(strDead) / 2, 50, paintGameOver);
-            canvas.drawText(strRespawn, 50 - paintGameOver.measureText(strRespawn) / 2, 60, paintGameOver);
-        }
-
         if (hasWon) {
             win();
-            String strWin = "YOU WIN";
-            String strScore = "Your score is: " + this.scene.getScore() + " points";
-            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
-            canvas.drawText(strWin, 50 - paintGameOver.measureText(strWin) / 2, 50, paintGameOver);
-            canvas.drawText(strScore, 50 - paintGameOver.measureText(strScore) / 2, 60, paintGameOver);
-        }
-
-        if (isPause) {
             String strWin = "YOU WIN";
             String strScore = "Your score is: " + this.scene.getScore() + " points";
             canvas.drawRect(10, 30, 90, 70, paintDeadRect);
@@ -355,5 +344,32 @@ public class GameEngine {
 
     public Audio getAudio() {
         return audio;
+    }
+
+    private void showPauseDialog() {
+        dialogBuilder.setTitle("Pause")
+                .setMessage("Click Resume to resume the game")
+                .setNegativeButton("Resume", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        resume();
+                    }
+                }).show();
+    }
+
+    private void showDieDialog() {
+        dialogBuilder.setTitle("YOU DIED")
+                .setMessage("Click Respawn to respawn")
+                .setNegativeButton("Respawn", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        resume();
+                    }
+                }).show();
+    }
+
+    private void showGameOverDialog() {
+        dialogBuilder.setTitle("GAME OVER")
+                .setMessage("You have no more Lives.").show();
     }
 }
