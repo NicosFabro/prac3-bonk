@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ncs.plataformes.characters.Bonk;
+import com.ncs.plataformes.characters.Boost;
 import com.ncs.plataformes.characters.Box;
 import com.ncs.plataformes.characters.Coin;
 import com.ncs.plataformes.characters.Crab;
@@ -35,6 +36,7 @@ public class Scene {
     private Bonk bonk;
 
     private List<Coin> coins;
+    private List<Boost> boosts;
     private List<Enemy> enemies;
     private List<Box> boxes;
 
@@ -52,6 +54,7 @@ public class Scene {
         score = 0;
         lives = 3;
         coins = new ArrayList<>();
+        boosts = new ArrayList<>();
         enemies = new ArrayList<>();
         boxes = new ArrayList<>();
     }
@@ -130,6 +133,14 @@ public class Scene {
                         this.spawnX = Integer.parseInt(parts2[0]) * 16;
                         this.spawnY = Integer.parseInt(parts2[1]) * 16;
                         break;
+                    case "BOOST":
+                        parts2 = args.split(",");
+                        if (parts2.length != 2) continue;
+                        int boostX = Integer.parseInt(parts2[0].trim()) * 16;
+                        int boostY = Integer.parseInt(parts2[1].trim()) * 16;
+                        Boost boost = new Boost(gameEngine, boostX, boostY);
+                        boosts.add(boost);
+                        break;
                 }
             }
             scene = lines.toArray(new String[0]);
@@ -201,6 +212,7 @@ public class Scene {
         bonk = gameEngine.getBonk();
 
         for (Coin coin : coins) coin.physics(delta);
+        for (Boost boost : boosts) boost.physics(delta);
         for (Enemy enemy : enemies) enemy.physics(delta);
         for (Box box : boxes) box.physics(delta);
 
@@ -215,6 +227,16 @@ public class Scene {
                     coins.remove(coin);
                     score += 10;
                     Log.d("ncs", "Score: " + score);
+                }
+            }
+
+            for (int i = boosts.size() - 1; i >= 0; i--) {
+                Boost boost = boosts.get(i);
+                if (bonkRect.intersect(boost.getCollisionRect())) {
+                    gameEngine.getAudio().coin();
+                    boosts.remove(boost);
+                    score += 100;
+                    Log.d("ncs", "Boost");
                 }
             }
 
@@ -268,6 +290,7 @@ public class Scene {
         }
 
         for (Coin coin : coins) coin.draw(canvas);
+        for (Boost boost : boosts) boost.draw(canvas);
         for (Enemy enemy : enemies) enemy.draw(canvas);
         for (Box box : boxes) box.draw(canvas);
 
