@@ -1,11 +1,13 @@
 package com.ncs.plataformes;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -30,9 +32,16 @@ public class GameEngine {
     private Bonk bonk;
     private Input input;
 
+    private int delta = 0;
+
     private List<Integer> scenes;
 
     private boolean hasWon;
+
+    private boolean isPause;
+    private boolean showDialog;
+
+    private AlertDialog.Builder dialogBuilder;
 
     public Bonk getBonk() {
         return bonk;
@@ -59,6 +68,7 @@ public class GameEngine {
         this.context = context;
         bitmapSet = new BitmapSet(context);
         audio = new Audio(context);
+        showDialog = true;
 
         // Relate to the game view
         this.gameView = gameView;
@@ -78,6 +88,8 @@ public class GameEngine {
         // Create Bonk
         spawn();
 
+        dialogBuilder = new AlertDialog.Builder(context);
+
         // Program the Handler for engine refresh (physics et al)
         handler = new Handler();
         Runnable runnable = new Runnable() {
@@ -90,12 +102,21 @@ public class GameEngine {
                 // Delta time between calls
                 if (last == 0) last = System.currentTimeMillis();
                 long now = System.currentTimeMillis();
-                int delta = (int) (now - last);
+                delta = (int) (now - last);
                 last = now;
                 physics(delta);
                 if (++count % INVALIDATES_PER_UPDATE == 0) {
                     GameEngine.this.gameView.invalidate();
                     count = 0;
+                }
+
+                if (bonk.isDead() && scene.getLives() != 0) {
+                    if (showDialog) showDieDialog();
+                    showDialog = false;
+                }
+                if (scene.getLives() == 0) {
+                    if (showDialog) showGameOverDialog();
+                    showDialog = false;
                 }
             }
         };
@@ -113,21 +134,36 @@ public class GameEngine {
     // For activity start
     void start() {
         audio.startMusic();
+        physics(delta);
+        isPause = false;
+        showDialog = true;
+        spawn();
+        scene.setScore(0);
+        scene.setLives(3);
     }
 
     // For activity stop
     void stop() {
         audio.stopMusic();
+        physics(0);
+        showGameOverDialog();
+//        isPause = true;
     }
 
     // For activity pause
     void pause() {
         audio.stopMusic();
+        physics(0);
+        showPauseDialog();
+        isPause = true;
     }
 
     // For activity resume
     void resume() {
         audio.startMusic();
+        physics(delta);
+        isPause = false;
+        showDialog = true;
     }
 
     public void win() {
@@ -153,14 +189,16 @@ public class GameEngine {
             else input.goRight();                       // RIGHT
         } else if ((y > 75) && (x > 80)) {
             if (down) input.jump();                     // JUMP
+        } else if ((y < 20) && (x > 80)) {
+            if (down) this.pause();                     // PAUSE
         } else {
             if (down) input.pause();                    // DEAD-ZONE
         }
 
-        if (act == MotionEvent.ACTION_DOWN && bonk.isDead()) {
-            spawn();
-            resume();
-        }
+//        if (act == MotionEvent.ACTION_DOWN && bonk.isDead()) {
+//            spawn();
+//            resume();
+//        }
 
         if (act == MotionEvent.ACTION_DOWN && hasWon)
             changeMap();
@@ -210,12 +248,13 @@ public class GameEngine {
 
     // Perform physics on all game objects
     private void physics(int delta) {
-        // Player physics
-        bonk.physics(delta);
+        if (!isPause) {
+            // Player physics
+            bonk.physics(delta);
 
-        // Other game objects' physics
-        scene.physics(delta);
-
+            // Other game objects' physics
+            scene.physics(delta);
+        }
         // ... and update scrolling
         updateOffsets();
     }
@@ -301,24 +340,8 @@ public class GameEngine {
         canvas.drawText("»", 28, 92, paint);
         canvas.drawRect(81, 76, 99, 99, paintKeys);
         canvas.drawText("^", 88, 92, paint);
-
-        if (bonk.isDead() && scene.getLives() != 0) {
-            pause();
-            String strDead = "You died";
-            String strRespawn = "Tap to respawn";
-            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
-            canvas.drawText(strDead, 50 - paintDeadDialog.measureText(strDead) / 2, 50, paintDeadDialog);
-            canvas.drawText(strRespawn, 50 - paintDeadDialog.measureText(strRespawn) / 2, 60, paintDeadDialog);
-        }
-
-        if (scene.getLives() == 0) {
-            stop();
-            String strDead = "GAME OVER";
-            String strRespawn = "No lives left";
-            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
-            canvas.drawText(strDead, 50 - paintGameOver.measureText(strDead) / 2, 50, paintGameOver);
-            canvas.drawText(strRespawn, 50 - paintGameOver.measureText(strRespawn) / 2, 60, paintGameOver);
-        }
+        canvas.drawRect(81, 1, 99, 20, paintKeys);
+        canvas.drawText("||", 87, 12, paint);
 
         if (hasWon) {
             win();
@@ -336,5 +359,40 @@ public class GameEngine {
 
     public Audio getAudio() {
         return audio;
+    }
+
+    private void showPauseDialog() {
+        dialogBuilder.setTitle("Pause")
+                .setMessage("Click Resume to resume the game")
+                .setNegativeButton("Resume", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        resume();
+                    }
+                }).show();
+    }
+
+    private void showDieDialog() {
+        dialogBuilder.setTitle("YOU DIED")
+                .setMessage("Click Respawn to respawn")
+                .setNegativeButton("Respawn", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        spawn();
+                        resume();
+                    }
+                }).show();
+    }
+
+    private void showGameOverDialog() {
+        dialogBuilder.setTitle("GAME OVER")
+                .setMessage("You have no more Lives.")
+                .setNegativeButton("Try Again", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        spawn();
+                        start();
+                    }
+                }).show();
     }
 }
