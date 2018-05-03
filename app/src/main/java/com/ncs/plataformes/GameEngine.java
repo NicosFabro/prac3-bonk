@@ -39,6 +39,7 @@ public class GameEngine {
     private boolean hasWon;
 
     private boolean isPause;
+    private boolean showDialog;
 
     private AlertDialog.Builder dialogBuilder;
 
@@ -67,6 +68,7 @@ public class GameEngine {
         this.context = context;
         bitmapSet = new BitmapSet(context);
         audio = new Audio(context);
+        showDialog = true;
 
         // Relate to the game view
         this.gameView = gameView;
@@ -108,8 +110,14 @@ public class GameEngine {
                     count = 0;
                 }
 
-                if (bonk.isDead() && scene.getLives() != 0) showDieDialog();
-                if (scene.getLives() == 0) showGameOverDialog();
+                if (bonk.isDead() && scene.getLives() != 0) {
+                    if (showDialog) showDieDialog();
+                    showDialog = false;
+                }
+                if (scene.getLives() == 0) {
+                    if (showDialog) showGameOverDialog();
+                    showDialog = false;
+                }
             }
         };
         handler.postDelayed(runnable, UPDATE_DELAY);
@@ -126,6 +134,12 @@ public class GameEngine {
     // For activity start
     void start() {
         audio.startMusic();
+        physics(delta);
+        isPause = false;
+        showDialog = true;
+        spawn();
+        scene.setScore(0);
+        scene.setLives(3);
     }
 
     // For activity stop
@@ -133,7 +147,7 @@ public class GameEngine {
         audio.stopMusic();
         physics(0);
         showGameOverDialog();
-        isPause = true;
+//        isPause = true;
     }
 
     // For activity pause
@@ -149,6 +163,7 @@ public class GameEngine {
         audio.startMusic();
         physics(delta);
         isPause = false;
+        showDialog = true;
     }
 
     public void win() {
@@ -363,6 +378,7 @@ public class GameEngine {
                 .setNegativeButton("Respawn", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        spawn();
                         resume();
                     }
                 }).show();
@@ -370,6 +386,13 @@ public class GameEngine {
 
     private void showGameOverDialog() {
         dialogBuilder.setTitle("GAME OVER")
-                .setMessage("You have no more Lives.").show();
+                .setMessage("You have no more Lives.")
+                .setNegativeButton("Try Again", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        spawn();
+                        start();
+                    }
+                }).show();
     }
 }

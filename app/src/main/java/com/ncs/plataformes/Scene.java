@@ -187,6 +187,14 @@ public class Scene {
         return lives;
     }
 
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void setLives(int lives) {
+        this.lives = lives;
+    }
+
     // Scene physics
     void physics(int delta) {
 
