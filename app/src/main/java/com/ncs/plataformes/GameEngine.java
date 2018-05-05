@@ -34,8 +34,9 @@ public class GameEngine {
 
     private int delta = 0;
 
+    private boolean boost;
     private List<Integer> scenes;
-    int sceneCounter = 0;
+    private int sceneCounter = 0;
 
     private boolean hasWon;
 
@@ -129,6 +130,7 @@ public class GameEngine {
                 if (seconds == 0) {
                     timerHandler.removeCallbacks(timerRunnable);
                     bonk.setVx(5);
+                    boost = false;
                 }
             }
         };
@@ -207,14 +209,6 @@ public class GameEngine {
             if (down) input.pause();                    // DEAD-ZONE
         }
 
-//        if (act == MotionEvent.ACTION_DOWN && bonk.isDead()) {
-//            spawn();
-//            resume();
-//        }
-
-//        if (act == MotionEvent.ACTION_DOWN && hasWon)
-//            changeMap();
-
         return true;
     }
 
@@ -265,7 +259,7 @@ public class GameEngine {
         return true;
     }
 
-    private Paint paint, paintKeys, paintScore, paintLives, paintDeadDialog, paintDeadRect, paintGameOver;
+    private Paint paint, paintKeys, paintScore, paintLives, paintBoost;
     private int screenWidth, screenHeight, scaledWidth;
     private float scale;
 
@@ -319,12 +313,8 @@ public class GameEngine {
             paintScore.setTextSize(5);
             paintLives = new Paint(paintScore);
             paintLives.setColor(Color.RED);
-            paintDeadDialog = new Paint(paintScore);
-            paintDeadDialog.setColor(Color.WHITE);
-            paintDeadDialog.setTextSize(7);
-            paintDeadRect = new Paint(paintKeys);
-            paintDeadRect.setColor(Color.argb(90, 0, 0, 0));
-            paintGameOver = new Paint(paintDeadDialog);
+            paintBoost = new Paint(paintScore);
+            paintBoost.setColor(Color.GREEN);
         }
 
         // Refresh scale factor if screen has changed sizes
@@ -366,17 +356,13 @@ public class GameEngine {
         canvas.drawRect(81, 1, 99, 20, paintKeys);
         canvas.drawText("||", 87, 12, paint);
 
-//        if (hasWon) {
-//            String strWin = "YOU WIN";
-//            String strScore = "Your score is: " + this.scene.getScore() + " points";
-//            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
-//            canvas.drawText(strWin, 50 - paintGameOver.measureText(strWin) / 2, 50, paintGameOver);
-//            canvas.drawText(strScore, 50 - paintGameOver.measureText(strScore) / 2, 60, paintGameOver);
-//        }
-
         // Score and Lives
         canvas.drawText("Score: " + this.scene.getScore(), 1, 5, paintScore);
         canvas.drawText("Lives: " + this.scene.getLives(), 1, 10, paintLives);
+
+        // Boost
+        if (boost)
+            canvas.drawText("Boost: " + this.seconds, 1, 15, paintBoost);
     }
 
     public Audio getAudio() {
@@ -446,8 +432,8 @@ public class GameEngine {
             seconds = 5 - seconds % 60;
             Log.d("ncs", "Boost seconds: " + seconds);
 
-//                timerTextView.setText(String.format("%d:%02d", minutes, seconds));
             bonk.setVx(10);
+            boost = true;
 
             timerHandler.postDelayed(this, 1000);
         }
