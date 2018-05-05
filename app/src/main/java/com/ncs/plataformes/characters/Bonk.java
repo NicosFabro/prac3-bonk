@@ -186,4 +186,12 @@ public class Bonk extends Character {
     public Rect getCollisionRect() {
         return (state == 3) ? null : collisionRect;
     }
+
+    public int getVx() {
+        return vx;
+    }
+
+    public void setVx(int vx) {
+        this.vx = vx;
+    }
 }

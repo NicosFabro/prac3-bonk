@@ -34,7 +34,9 @@ public class GameEngine {
 
     private int delta = 0;
 
+    private boolean boost;
     private List<Integer> scenes;
+    private int sceneCounter = 0;
 
     private boolean hasWon;
 
@@ -83,7 +85,7 @@ public class GameEngine {
         scenes.add(R.raw.scene);
         scenes.add(R.raw.scene2);
         scenes.add(R.raw.last_map);
-        scene.loadFromFile(scenes.remove(0));
+        scene.loadFromFile(scenes.get(sceneCounter));
 
         // Create Bonk
         spawn();
@@ -110,13 +112,25 @@ public class GameEngine {
                     count = 0;
                 }
 
-                if (bonk.isDead() && scene.getLives() != 0) {
-                    if (showDialog) showDieDialog();
-                    showDialog = false;
+                if (showDialog) {
+                    if (bonk.isDead() && scene.getLives() != 0) {
+                        showDieDialog();
+                        showDialog = false;
+                    }
+                    if (scene.getLives() == 0) {
+                        showGameOverDialog();
+                        showDialog = false;
+                    }
+                    if (hasWon) {
+                        showWinDialog();
+                        showDialog = false;
+                    }
                 }
-                if (scene.getLives() == 0) {
-                    if (showDialog) showGameOverDialog();
-                    showDialog = false;
+
+                if (seconds == 0) {
+                    timerHandler.removeCallbacks(timerRunnable);
+                    bonk.setVx(5);
+                    boost = false;
                 }
             }
         };
@@ -167,7 +181,7 @@ public class GameEngine {
     }
 
     public void win() {
-        this.stop();
+        isPause = true;
         hasWon = true;
     }
 
@@ -195,22 +209,25 @@ public class GameEngine {
             if (down) input.pause();                    // DEAD-ZONE
         }
 
-//        if (act == MotionEvent.ACTION_DOWN && bonk.isDead()) {
-//            spawn();
-//            resume();
-//        }
-
-        if (act == MotionEvent.ACTION_DOWN && hasWon)
-            changeMap();
-
         return true;
     }
 
     private void changeMap() {
+        sceneCounter++;
         hasWon = false;
         if (!scenes.isEmpty()) {
             scene = new Scene(this);
-            scene.loadFromFile(scenes.remove(0));
+            scene.loadFromFile(scenes.get(sceneCounter));
+        } else {
+            Log.d("ncs", "changeMap: No more scenes");
+        }
+        spawn();
+    }
+
+    private void restartMap() {
+        if (!scenes.isEmpty()) {
+            scene = new Scene(this);
+            scene.loadFromFile(scenes.get(sceneCounter));
         } else {
             Log.d("ncs", "changeMap: No more scenes");
         }
@@ -242,7 +259,7 @@ public class GameEngine {
         return true;
     }
 
-    private Paint paint, paintKeys, paintScore, paintLives, paintDeadDialog, paintDeadRect, paintGameOver;
+    private Paint paint, paintKeys, paintScore, paintLives, paintBoost;
     private int screenWidth, screenHeight, scaledWidth;
     private float scale;
 
@@ -296,12 +313,8 @@ public class GameEngine {
             paintScore.setTextSize(5);
             paintLives = new Paint(paintScore);
             paintLives.setColor(Color.RED);
-            paintDeadDialog = new Paint(paintScore);
-            paintDeadDialog.setColor(Color.WHITE);
-            paintDeadDialog.setTextSize(7);
-            paintDeadRect = new Paint(paintKeys);
-            paintDeadRect.setColor(Color.argb(90, 0, 0, 0));
-            paintGameOver = new Paint(paintDeadDialog);
+            paintBoost = new Paint(paintScore);
+            paintBoost.setColor(Color.GREEN);
         }
 
         // Refresh scale factor if screen has changed sizes
@@ -343,18 +356,13 @@ public class GameEngine {
         canvas.drawRect(81, 1, 99, 20, paintKeys);
         canvas.drawText("||", 87, 12, paint);
 
-        if (hasWon) {
-            win();
-            String strWin = "YOU WIN";
-            String strScore = "Your score is: " + this.scene.getScore() + " points";
-            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
-            canvas.drawText(strWin, 50 - paintGameOver.measureText(strWin) / 2, 50, paintGameOver);
-            canvas.drawText(strScore, 50 - paintGameOver.measureText(strScore) / 2, 60, paintGameOver);
-        }
-
         // Score and Lives
         canvas.drawText("Score: " + this.scene.getScore(), 1, 5, paintScore);
         canvas.drawText("Lives: " + this.scene.getLives(), 1, 10, paintLives);
+
+        // Boost
+        if (boost)
+            canvas.drawText("Boost: " + this.seconds, 1, 15, paintBoost);
     }
 
     public Audio getAudio() {
@@ -390,9 +398,44 @@ public class GameEngine {
                 .setNegativeButton("Try Again", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        spawn();
+                        restartMap();
                         start();
                     }
                 }).show();
     }
+
+    private void showWinDialog() {
+        dialogBuilder.setTitle("YOU WIN")
+                .setMessage("Click to change map.")
+                .setNegativeButton("Next map", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        changeMap();
+                        start();
+                    }
+                }).show();
+    }
+
+    public void boost() {
+        startTime = System.currentTimeMillis();
+        timerHandler.postDelayed(timerRunnable, 0);
+    }
+
+    private long startTime = 0;
+    private int seconds = 5;
+    private Handler timerHandler = new Handler();
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            seconds = (int) (millis / 1000);
+            seconds = 5 - seconds % 60;
+            Log.d("ncs", "Boost seconds: " + seconds);
+
+            bonk.setVx(10);
+            boost = true;
+
+            timerHandler.postDelayed(this, 1000);
+        }
+    };
 }
