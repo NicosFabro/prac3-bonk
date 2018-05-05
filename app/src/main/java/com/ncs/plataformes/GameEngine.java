@@ -35,6 +35,7 @@ public class GameEngine {
     private int delta = 0;
 
     private List<Integer> scenes;
+    int sceneCounter = 0;
 
     private boolean hasWon;
 
@@ -83,7 +84,7 @@ public class GameEngine {
         scenes.add(R.raw.scene);
         scenes.add(R.raw.scene2);
         scenes.add(R.raw.last_map);
-        scene.loadFromFile(scenes.remove(0));
+        scene.loadFromFile(scenes.get(sceneCounter));
 
         // Create Bonk
         spawn();
@@ -110,13 +111,19 @@ public class GameEngine {
                     count = 0;
                 }
 
-                if (bonk.isDead() && scene.getLives() != 0) {
-                    if (showDialog) showDieDialog();
-                    showDialog = false;
-                }
-                if (scene.getLives() == 0) {
-                    if (showDialog) showGameOverDialog();
-                    showDialog = false;
+                if (showDialog) {
+                    if (bonk.isDead() && scene.getLives() != 0) {
+                        showDieDialog();
+                        showDialog = false;
+                    }
+                    if (scene.getLives() == 0) {
+                        showGameOverDialog();
+                        showDialog = false;
+                    }
+                    if (hasWon) {
+                        showWinDialog();
+                        showDialog = false;
+                    }
                 }
             }
         };
@@ -167,7 +174,7 @@ public class GameEngine {
     }
 
     public void win() {
-        this.stop();
+        isPause = true;
         hasWon = true;
     }
 
@@ -200,17 +207,28 @@ public class GameEngine {
 //            resume();
 //        }
 
-        if (act == MotionEvent.ACTION_DOWN && hasWon)
-            changeMap();
+//        if (act == MotionEvent.ACTION_DOWN && hasWon)
+//            changeMap();
 
         return true;
     }
 
     private void changeMap() {
+        sceneCounter++;
         hasWon = false;
         if (!scenes.isEmpty()) {
             scene = new Scene(this);
-            scene.loadFromFile(scenes.remove(0));
+            scene.loadFromFile(scenes.get(sceneCounter));
+        } else {
+            Log.d("ncs", "changeMap: No more scenes");
+        }
+        spawn();
+    }
+
+    private void restartMap() {
+        if (!scenes.isEmpty()) {
+            scene = new Scene(this);
+            scene.loadFromFile(scenes.get(sceneCounter));
         } else {
             Log.d("ncs", "changeMap: No more scenes");
         }
@@ -343,14 +361,13 @@ public class GameEngine {
         canvas.drawRect(81, 1, 99, 20, paintKeys);
         canvas.drawText("||", 87, 12, paint);
 
-        if (hasWon) {
-            win();
-            String strWin = "YOU WIN";
-            String strScore = "Your score is: " + this.scene.getScore() + " points";
-            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
-            canvas.drawText(strWin, 50 - paintGameOver.measureText(strWin) / 2, 50, paintGameOver);
-            canvas.drawText(strScore, 50 - paintGameOver.measureText(strScore) / 2, 60, paintGameOver);
-        }
+//        if (hasWon) {
+//            String strWin = "YOU WIN";
+//            String strScore = "Your score is: " + this.scene.getScore() + " points";
+//            canvas.drawRect(10, 30, 90, 70, paintDeadRect);
+//            canvas.drawText(strWin, 50 - paintGameOver.measureText(strWin) / 2, 50, paintGameOver);
+//            canvas.drawText(strScore, 50 - paintGameOver.measureText(strScore) / 2, 60, paintGameOver);
+//        }
 
         // Score and Lives
         canvas.drawText("Score: " + this.scene.getScore(), 1, 5, paintScore);
@@ -390,7 +407,19 @@ public class GameEngine {
                 .setNegativeButton("Try Again", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        spawn();
+                        restartMap();
+                        start();
+                    }
+                }).show();
+    }
+
+    private void showWinDialog() {
+        dialogBuilder.setTitle("YOU WIN")
+                .setMessage("Click to change map.")
+                .setNegativeButton("Next map", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        changeMap();
                         start();
                     }
                 }).show();
