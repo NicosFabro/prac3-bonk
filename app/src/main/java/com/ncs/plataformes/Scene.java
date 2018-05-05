@@ -234,6 +234,7 @@ public class Scene {
                 Boost boost = boosts.get(i);
                 if (bonkRect.intersect(boost.getCollisionRect())) {
                     gameEngine.getAudio().coin();
+                    gameEngine.boost();
                     boosts.remove(boost);
                     score += 100;
                     Log.d("ncs", "Boost");

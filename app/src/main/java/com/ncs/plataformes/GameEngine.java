@@ -125,6 +125,11 @@ public class GameEngine {
                         showDialog = false;
                     }
                 }
+
+                if (seconds == 0) {
+                    timerHandler.removeCallbacks(timerRunnable);
+                    bonk.setVx(5);
+                }
             }
         };
         handler.postDelayed(runnable, UPDATE_DELAY);
@@ -424,4 +429,27 @@ public class GameEngine {
                     }
                 }).show();
     }
+
+    public void boost() {
+        startTime = System.currentTimeMillis();
+        timerHandler.postDelayed(timerRunnable, 0);
+    }
+
+    private long startTime = 0;
+    private int seconds = 5;
+    private Handler timerHandler = new Handler();
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            seconds = (int) (millis / 1000);
+            seconds = 5 - seconds % 60;
+            Log.d("ncs", "Boost seconds: " + seconds);
+
+//                timerTextView.setText(String.format("%d:%02d", minutes, seconds));
+            bonk.setVx(10);
+
+            timerHandler.postDelayed(this, 1000);
+        }
+    };
 }
