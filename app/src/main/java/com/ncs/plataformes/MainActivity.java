@@ -34,18 +34,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        gameEngine.resume();
+        gameEngine.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        gameEngine.pause();
+        gameEngine.onPause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        gameEngine.stop();
+        gameEngine.onDestroy();
     }
 }

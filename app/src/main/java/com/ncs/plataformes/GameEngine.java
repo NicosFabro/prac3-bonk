@@ -2,6 +2,7 @@ package com.ncs.plataformes;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,6 +14,13 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import com.ncs.plataformes.characters.Bonk;
+import com.ncs.plataformes.characters.Boost;
+import com.ncs.plataformes.characters.Coin;
+import com.ncs.plataformes.utils.StatusSaver;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +30,8 @@ public class GameEngine {
     private static final int UPDATE_DELAY = 50;             // 50ms             => 20 physics/sec
     private static final int INVALIDATES_PER_UPDATE = 2;    // 2 * 50ms = 100ms => 10 redraws/sec
     private static final int SCALED_HEIGHT = 16 * 16;       // 16 rows of scene (16px each tile)
+
+    private final StatusSaver statusSaver = new StatusSaver(this);
 
     private Context context;
     private GameView gameView;
@@ -49,7 +59,7 @@ public class GameEngine {
         return bonk;
     }
 
-    Context getContext() {
+    public Context getContext() {
         return context;
     }
 
@@ -202,7 +212,7 @@ public class GameEngine {
             else if (x < 20) input.goLeft();            // LEFT
             else input.goRight();                       // RIGHT
         } else if ((y > 75) && (x > 80)) {
-            if (down) input.jump();                     // JUMP
+            if (down) /*input.jump();*/this.statusSaver.saveStatus();                     // JUMP
         } else if ((y < 20) && (x > 80)) {
             if (down) this.pause();                     // PAUSE
         } else {
@@ -438,4 +448,62 @@ public class GameEngine {
             timerHandler.postDelayed(this, 1000);
         }
     };
+
+    void onResume() {
+        SharedPreferences sharedPref = context.getSharedPreferences("statusData", Context.MODE_PRIVATE);;
+        String bonkStatus = sharedPref.getString("bonkStatus", "-1");
+        Log.d("ncs", "onResume: Bonk Status: " + bonkStatus);
+
+        if (bonkStatus.equals("-1")) {
+            start();
+        } else {
+            try {
+                JSONObject jsonBonkStatus = new JSONObject(bonkStatus);
+                int bonkX = Integer.parseInt(jsonBonkStatus.getString("bonkX"));
+                int bonkY = Integer.parseInt(jsonBonkStatus.getString("bonkY"));
+                int lives = Integer.parseInt(jsonBonkStatus.getString("lives"));
+                int score = Integer.parseInt(jsonBonkStatus.getString("score"));
+
+                bonk = new Bonk(this, bonkX, bonkY);
+                bonk.setLives(lives);
+                bonk.setScore(score);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        String sceneStatus = sharedPref.getString("sceneStatus", "-1");
+        Log.d("ncs", "onResume: Scene Status: " + sceneStatus);
+
+        if (sceneStatus.equals("-1")) {
+            start();
+        } else {
+            try {
+                JSONObject jsonSceneStatus = new JSONObject(sceneStatus);
+
+                JSONArray coins = jsonSceneStatus.getJSONArray("coins");
+                scene.getCoins().clear();
+                for (int i = 0; i < coins.length(); i++) {
+                    scene.getCoins().add(new Coin(this, coins.getJSONObject(i).getInt("coinX"), coins.getJSONObject(i).getInt("coinY")));
+                }
+
+                JSONArray boosts = jsonSceneStatus.getJSONArray("boosts");
+                scene.getBoosts().clear();
+                for (int i = 0; i < boosts.length(); i++) {
+                    scene.getBoosts().add(new Boost(this, boosts.getJSONObject(i).getInt("boostX"), boosts.getJSONObject(i).getInt("boostY")));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    void onPause() {
+        this.statusSaver.saveStatus();
+    }
+
+    void onDestroy() {
+        this.statusSaver.saveStatus();
+    }
 }

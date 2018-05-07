@@ -275,4 +275,20 @@ public class Scene {
         for (Box box : boxes) box.draw(canvas);
 
     }
+
+    public List<Coin> getCoins() {
+        return coins;
+    }
+
+    public List<Boost> getBoosts() {
+        return boosts;
+    }
+
+    public void setCoins(List<Coin> coins) {
+        this.coins = coins;
+    }
+
+    public void setBoosts(List<Boost> boosts) {
+        this.boosts = boosts;
+    }
 }
