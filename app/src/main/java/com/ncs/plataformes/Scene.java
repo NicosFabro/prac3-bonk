@@ -43,16 +43,11 @@ public class Scene {
     int spawnX;
     int spawnY;
 
-    int score;
-    int lives;
-
     Scene(GameEngine gameEngine) {
         this.gameEngine = gameEngine;
         paint = new Paint();
         CHARS = new SparseIntArray();
         WATERLEVEL = 999;
-        score = 0;
-        lives = 3;
         coins = new ArrayList<>();
         boosts = new ArrayList<>();
         enemies = new ArrayList<>();
@@ -190,22 +185,6 @@ public class Scene {
         return sceneHeight * 16;
     }
 
-    public int getScore() {
-        return score;
-    }
-
-    public int getLives() {
-        return lives;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    public void setLives(int lives) {
-        this.lives = lives;
-    }
-
     // Scene physics
     void physics(int delta) {
 
@@ -225,8 +204,8 @@ public class Scene {
                 if (bonkRect.intersect(coin.getCollisionRect())) {
                     gameEngine.getAudio().coin();
                     coins.remove(coin);
-                    score += 10;
-                    Log.d("ncs", "Score: " + score);
+                    bonk.scorePlus(10);
+                    Log.d("ncs", "Score: " + bonk.getScore());
                 }
             }
 
@@ -236,7 +215,7 @@ public class Scene {
                     gameEngine.getAudio().coin();
                     gameEngine.boost();
                     boosts.remove(boost);
-                    score += 100;
+                    bonk.scorePlus(100);
                     Log.d("ncs", "Boost");
                 }
             }
@@ -245,8 +224,8 @@ public class Scene {
                 if (bonkRect.intersect(enemy.getCollisionRect())) {
                     gameEngine.getAudio().die();
                     bonk.die();
-                    lives--;
-                    Log.d("ncs", "Lives: " + lives);
+                    bonk.lessLives();
+                    Log.d("ncs", "Lives: " + bonk.getLives());
                 }
             }
 
