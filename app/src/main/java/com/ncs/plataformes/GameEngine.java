@@ -113,11 +113,11 @@ public class GameEngine {
                 }
 
                 if (showDialog) {
-                    if (bonk.isDead() && scene.getLives() != 0) {
+                    if (bonk.isDead() && bonk.getLives() != 0) {
                         showDieDialog();
                         showDialog = false;
                     }
-                    if (scene.getLives() == 0) {
+                    if (bonk.getLives() == 0) {
                         showGameOverDialog();
                         showDialog = false;
                     }
@@ -152,8 +152,8 @@ public class GameEngine {
         isPause = false;
         showDialog = true;
         spawn();
-        scene.setScore(0);
-        scene.setLives(3);
+        bonk.setScore(0);
+        bonk.setLives(3);
     }
 
     // For activity stop
@@ -357,8 +357,8 @@ public class GameEngine {
         canvas.drawText("||", 87, 12, paint);
 
         // Score and Lives
-        canvas.drawText("Score: " + this.scene.getScore(), 1, 5, paintScore);
-        canvas.drawText("Lives: " + this.scene.getLives(), 1, 10, paintLives);
+        canvas.drawText("Score: " + this.bonk.getScore(), 1, 5, paintScore);
+        canvas.drawText("Lives: " + this.bonk.getLives(), 1, 10, paintLives);
 
         // Boost
         if (boost)
