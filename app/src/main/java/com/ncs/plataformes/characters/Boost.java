@@ -25,4 +25,12 @@ public class Boost extends Character {
     void updateCollisionRect() {
         collisionRect.set(x, y, x + 16, y + 16);
     }
+
+    @Override
+    public String toString() {
+        return "Boost{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }

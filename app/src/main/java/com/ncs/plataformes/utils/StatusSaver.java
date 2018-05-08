@@ -67,22 +67,23 @@ public class StatusSaver {
         Scene scene = this.gameEngine.getScene();
         List<Coin> coins = scene.getCoins();
         List<Boost> boosts = scene.getBoosts();
+        Log.d("ncs", "setSceneStatusData: boost" + boosts.get(0));
 
         JSONArray jsonCoins = new JSONArray();
         JSONArray jsonBoosts = new JSONArray();
 
         for (int i = 0; i < coins.size() - 1; i++) {
             Map<String, Integer> coinDataMap = new HashMap<>();
-            coinDataMap.put("coinX", coins.get(i).getX());
-            coinDataMap.put("coinY", coins.get(i).getY());
+            coinDataMap.put("\"coinX\"", coins.get(i).getX());
+            coinDataMap.put("\"coinY\"", coins.get(i).getY());
 
             jsonCoins.put(coinDataMap);
         }
 
-        for (int i = 0; i < boosts.size() - 1; i++) {
+        for (int i = 0; i < boosts.size(); i++) {
             Map<String, Integer> boostDataMap = new HashMap<>();
-            boostDataMap.put("boostX", boosts.get(i).getX());
-            boostDataMap.put("boostY", boosts.get(i).getY());
+            boostDataMap.put("\"boostX\"", boosts.get(i).getX());
+            boostDataMap.put("\"boostY\"", boosts.get(i).getY());
 
             jsonBoosts.put(boostDataMap);
         }

@@ -475,6 +475,8 @@ public class GameEngine {
 
         String sceneStatus = sharedPref.getString("sceneStatus", "-1");
         Log.d("ncs", "onResume: Scene Status: " + sceneStatus);
+        sceneStatus = sceneStatus.replace('=', ':');
+        sceneStatus = sceneStatus.replaceAll("\\s+","");
 
         if (sceneStatus.equals("-1")) {
             start();
@@ -485,13 +487,14 @@ public class GameEngine {
                 JSONArray coins = jsonSceneStatus.getJSONArray("coins");
                 scene.getCoins().clear();
                 for (int i = 0; i < coins.length(); i++) {
-                    scene.getCoins().add(new Coin(this, coins.getJSONObject(i).getInt("coinX"), coins.getJSONObject(i).getInt("coinY")));
+                    Log.d("ncs", "onResume: coin: <" + coins.get(i) + ">");
+                    scene.getCoins().add(new Coin(this, new JSONObject((String) coins.get(i)).getInt("coinX"), new JSONObject((String) coins.get(i)).getInt("coinY")));
                 }
 
                 JSONArray boosts = jsonSceneStatus.getJSONArray("boosts");
                 scene.getBoosts().clear();
                 for (int i = 0; i < boosts.length(); i++) {
-                    scene.getBoosts().add(new Boost(this, boosts.getJSONObject(i).getInt("boostX"), boosts.getJSONObject(i).getInt("boostY")));
+                    scene.getBoosts().add(new Boost(this, new JSONObject((String) boosts.get(i)).getInt("boostX"), new JSONObject((String) boosts.get(i)).getInt("boostY")));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
