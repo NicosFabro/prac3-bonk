@@ -9,16 +9,14 @@ import android.widget.ProgressBar;
 import com.google.gson.Gson;
 import com.ncs.plataformes.R;
 import com.ncs.plataformes.models.Game;
-import com.ncs.plataformes.models.GameList;
 import com.ncs.plataformes.models.Ranking;
 import com.ncs.plataformes.models.RankingList;
-import com.ncs.plataformes.models.Result;
+import com.ncs.plataformes.models.ResultGame;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
 
 public class RankingSearchTask extends AsyncTask<String, Integer, RankingList> {
 
@@ -47,6 +45,12 @@ public class RankingSearchTask extends AsyncTask<String, Integer, RankingList> {
         progressBar.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Function which works in the background and makes all the API things
+     *
+     * @param strings Not using
+     * @return rankingList RankingList found
+     */
     @Override
     protected RankingList doInBackground(String... strings) {
 
@@ -80,10 +84,10 @@ public class RankingSearchTask extends AsyncTask<String, Integer, RankingList> {
 
 //            DECODE JSON
             Gson gson = new Gson();
-            Result result = gson.fromJson(json, Result.class);
-            Log.d("ncs", "RESULT: " + result);
+            ResultGame resultGame = gson.fromJson(json, ResultGame.class);
+            Log.d("ncs", "RESULT: " + resultGame);
 
-            Game game = result.getGame();
+            Game game = resultGame.getGame();
             Log.d("ncs", "GAME: " + game);
             Ranking[] rankings = game.getRanking();
             for (Ranking ranking : rankings) {
@@ -108,6 +112,12 @@ public class RankingSearchTask extends AsyncTask<String, Integer, RankingList> {
         return null;
     }
 
+    /**
+     * Function called after the execute
+     * This function makes the ProgressBar disappear
+     *
+     * @param rankingList List of the users in the RankingList recieved
+     */
     @Override
     protected void onPostExecute(RankingList rankingList) {
         Log.d("ncs", "onPostExecute: ");

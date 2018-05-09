@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.ncs.plataformes.R;
 import com.ncs.plataformes.models.Ranking;
 import com.ncs.plataformes.models.RankingList;
+import com.ncs.plataformes.models.User;
 import com.squareup.picasso.Picasso;
 
 public class RankingUserListAdapter
@@ -25,18 +26,43 @@ public class RankingUserListAdapter
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
+        User user;
         ImageView imgUser;
         TextView tvUserId, tvFullName, tvUsername, tvScore;
 
         public ViewHolder(View view) {
             super(view);
             imgUser = view.findViewById(R.id.imgUser);
-            tvUserId = view.findViewById(R.id.tvGameId);
+            tvUserId = view.findViewById(R.id.tvUserId);
             tvFullName = view.findViewById(R.id.tvFullName);
             tvUsername = view.findViewById(R.id.tvUsername);
             tvScore = view.findViewById(R.id.tvScore);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (user == null) return;
+                    if (listener != null) listener.itemClicked(v, user);
+                }
+            });
         }
     }
+
+//    region ItemClickListener
+
+    /**
+     * Interface to implement the click listener
+     */
+    public interface OnItemClickListener {
+        void itemClicked(View view, User user);
+    }
+
+    private OnItemClickListener listener;
+
+    public void setOnClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+//    endregion
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -45,17 +71,24 @@ public class RankingUserListAdapter
         return new ViewHolder(view);
     }
 
+    /**
+     * Function for setting the TextViews values from the user
+     *
+     * @param holder   ViewHolder
+     * @param position number of the game in the RecyclerView
+     */
     @Override
     public void onBindViewHolder(RankingUserListAdapter.ViewHolder holder, int position) {
         Ranking ranking = rankingList.getRankings()[position];
+        User user = ranking.getUser();
         Context context = holder.tvUserId.getContext();
+        holder.user = user;
         holder.tvUserId.setText(context.getString(R.string.strId, ranking.getId()));
-        Log.d("ncs", "onBindViewHolder: USERNAME: " + ranking.getUser().getUsername());
-        holder.tvUsername.setText(ranking.getUser().getUsername());
-//        holder.tvFullName.setText(ranking.getUser().getFirstname() + ranking.getUser().getLastname());
-        holder.tvFullName.setText(context.getString(R.string.fullName, ranking.getUser().getFirstname(), ranking.getUser().getLastname()));
+        Log.d("ncs", "onBindViewHolder: USERNAME: " + user.getUsername());
+        holder.tvUsername.setText(user.getUsername());
+        holder.tvFullName.setText(context.getString(R.string.fullName, user.getFirstname(), user.getLastname()));
         holder.tvScore.setText(context.getString(R.string.position, position + 1, Integer.parseInt(ranking.getScore())));
-        Picasso.with(context).load(ranking.getUser().getAvatarPath()).into(holder.imgUser);
+        Picasso.with(context).load(user.getAvatarPath()).into(holder.imgUser);
     }
 
     @Override

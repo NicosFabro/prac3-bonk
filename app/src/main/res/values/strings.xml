@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Plataformes</string>
+    <string name="app_name">NCS-Plataformes</string>
 
     <string name="play">Play</string>
     <string name="ranking">Ranking</string>
@@ -8,6 +8,8 @@
 
     <string name="gameSearch">Game Search</string>
     <string name="rankingGame">%s Ranking</string>
+
+    <string name="user">%s</string>
 
     <string name="username">Username</string>
     <string name="fullName">%s %s</string>
@@ -25,5 +27,6 @@
     <string name="apiKey" translatable="false">48d256f9583d5e3a1932242f152fcbf6</string>
     <string name="searchGameList" translatable="false">http://stucom.flx.cat/game/api/game</string>
     <string name="searchRankingList" translatable="false">http://stucom.flx.cat/game/api/game/%d</string>
+    <string name="searchUser" translatable="false">http://stucom.flx.cat/game/api/user/%d</string>
     <string name="searchGame" translatable="false">http://stucom.flx.cat/game/api/game/%s</string>
 </resources>

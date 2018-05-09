@@ -45,6 +45,11 @@ public class GameListAdapter
         }
     }
 
+//    region ItemClickListener
+
+    /**
+     * Interface to implement the click listener
+     */
     public interface OnItemClickListener {
         void itemClicked(View view, Game game);
     }
@@ -54,6 +59,7 @@ public class GameListAdapter
     public void setOnClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
+//    endregion
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -62,6 +68,10 @@ public class GameListAdapter
         return new ViewHolder(view);
     }
 
+    /**
+     * @param holder   ViewHolder
+     * @param position number of the game in the RecyclerView
+     */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Game game = gameList.getGames()[position];

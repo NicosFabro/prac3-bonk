@@ -504,9 +504,11 @@ public class GameEngine {
 
     void onPause() {
         this.statusSaver.saveStatus();
+        this.audio.stopMusic();
     }
 
     void onDestroy() {
         this.statusSaver.saveStatus();
+        this.audio.stopMusic();
     }
 }

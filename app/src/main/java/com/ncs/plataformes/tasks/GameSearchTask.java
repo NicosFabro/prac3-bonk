@@ -42,6 +42,12 @@ public class GameSearchTask extends AsyncTask<String, Integer, GameList> {
         progressBar.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Function which works in the background and makes all the API things
+     *
+     * @param strings Not using
+     * @return gameList GameList found
+     */
     @Override
     protected GameList doInBackground(String... strings) {
 
@@ -50,7 +56,7 @@ public class GameSearchTask extends AsyncTask<String, Integer, GameList> {
         InputStream in = null;
 
         try {
-//        BUILD URL
+//            BUILD URL
             String urlStr = weakReference.getContext().getString(R.string.searchGameList);
             Log.d("ncs", "URL: " + urlStr);
 
@@ -97,6 +103,12 @@ public class GameSearchTask extends AsyncTask<String, Integer, GameList> {
         return null;
     }
 
+    /**
+     * Function called after the execute
+     * This function makes the ProgressBar disappear
+     *
+     * @param gameList List of the games recieved
+     */
     @Override
     protected void onPostExecute(GameList gameList) {
         Log.d("ncs", "onPostExecute: ");

@@ -8,7 +8,7 @@ import android.widget.ProgressBar;
 
 import com.google.gson.Gson;
 import com.ncs.plataformes.R;
-import com.ncs.plataformes.models.Result;
+import com.ncs.plataformes.models.ResultUser;
 import com.ncs.plataformes.models.User;
 
 import java.io.ByteArrayOutputStream;
@@ -34,7 +34,6 @@ public class UserSearchTask extends AsyncTask<String, Integer, User> {
         this.weakReference = weakReference;
         this.idRecieved = idRecieved;
     }
-
     @Override
     protected void onPreExecute() {
         Log.d("ncs", "onPreExecute: ");
@@ -43,6 +42,12 @@ public class UserSearchTask extends AsyncTask<String, Integer, User> {
         progressBar.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Function which works in the background and makes all the API things
+     *
+     * @param strings Not using
+     * @return user User found
+     */
     @Override
     protected User doInBackground(String... strings) {
 
@@ -52,7 +57,7 @@ public class UserSearchTask extends AsyncTask<String, Integer, User> {
 
         try {
 //        BUILD URL
-            String urlStr = String.format(weakReference.getContext().getString(R.string.searchRankingList), idRecieved);
+            String urlStr = String.format(weakReference.getContext().getString(R.string.searchUser), idRecieved);
             Log.d("ncs", "URL: " + urlStr);
 
 //            OPEN CONNECTION
@@ -76,11 +81,10 @@ public class UserSearchTask extends AsyncTask<String, Integer, User> {
 
 //            DECODE JSON
             Gson gson = new Gson();
-            Result result = gson.fromJson(json, Result.class);
+            ResultUser result = gson.fromJson(json, ResultUser.class);
             Log.d("ncs", "RESULT: " + result);
 
             return result.getUser();
-
         } catch (Exception e) {
             Log.e("ncs", e.getMessage());
         } finally {
@@ -93,6 +97,12 @@ public class UserSearchTask extends AsyncTask<String, Integer, User> {
         return null;
     }
 
+    /**
+     * Function called after the execute
+     * This function makes the ProgressBar disappear
+     *
+     * @param user User recieved
+     */
     @Override
     protected void onPostExecute(User user) {
         Log.d("ncs", "onPostExecute: ");

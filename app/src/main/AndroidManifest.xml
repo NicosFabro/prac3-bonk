@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ncs.plataformes">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/bonk"
@@ -19,11 +21,18 @@
         <activity
             android:name=".GameActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="landscape">
-        </activity>
-        <activity android:name=".AboutActivity" />
-        <activity android:name=".RankingActivity" />
-        <activity android:name=".SettingsActivity" />
+            android:screenOrientation="landscape"
+            android:theme="@style/GameTheme"/>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/settings" />
+        <activity
+            android:name=".RankingActivity"
+            android:label="@string/ranking" />
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/about" />
+        <activity android:name=".UserActivity" />
     </application>
 
 </manifest>

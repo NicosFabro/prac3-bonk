@@ -15,20 +15,22 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ncs.plataformes.R;
 import com.ncs.plataformes.adapters.GameListAdapter;
 import com.ncs.plataformes.adapters.RankingUserListAdapter;
 import com.ncs.plataformes.models.Game;
 import com.ncs.plataformes.models.GameList;
 import com.ncs.plataformes.models.RankingList;
+import com.ncs.plataformes.models.User;
 import com.ncs.plataformes.tasks.GameSearchTask;
 import com.ncs.plataformes.tasks.RankingSearchTask;
 
 public class RankingActivity extends AppCompatActivity
         implements GameSearchTask.WeakReference,
         RankingSearchTask.WeakReference,
-        GameListAdapter.OnItemClickListener {
+        GameListAdapter.OnItemClickListener,
+        RankingUserListAdapter.OnItemClickListener {
 
+    //    VIEWS
     ActionBar actionBar;
     TextView titleTextView;
     ProgressBar progressBar;
@@ -41,7 +43,6 @@ public class RankingActivity extends AppCompatActivity
 
         actionBar = getSupportActionBar();
 
-        // actionBar
         if (actionBar != null) {
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
@@ -70,10 +71,6 @@ public class RankingActivity extends AppCompatActivity
                     actionBarTitle = String.format(getContext().getString(R.string.rankingGame), gameName);
                     titleTextView.setText(actionBarTitle);
                     break;
-                case "user":
-                    int userId= intent.getIntExtra("userId", 0);
-                    String username = intent.getStringExtra("username");
-
             }
         }
 
@@ -82,11 +79,17 @@ public class RankingActivity extends AppCompatActivity
         actionBar.setCustomView(titleTextView);
     }
 
+    /**
+     * Function to find the views from the layout
+     */
     private void findViews() {
         progressBar = findViewById(R.id.progressBar);
         recyclerView = findViewById(R.id.recyclerView);
     }
 
+    /**
+     * Function to style the action bar title
+     */
     private void setTitleStyle() {
         titleTextView.setTextSize(20.0f);
         titleTextView.setTextColor(getResources().getColor(R.color.colorText));
@@ -110,6 +113,23 @@ public class RankingActivity extends AppCompatActivity
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(userListAdapter);
+        userListAdapter.setOnClickListener(this);
+    }
+
+    @Override
+    public void itemClicked(View view, User user) {
+        int userId = user.getId();
+        String username = user.getUsername();
+        Log.d("ncs", "itemClicked: ID: " + userId);
+        String strUserId = String.valueOf(userId);
+        Toast.makeText(view.getContext(), "USER ID: " + strUserId, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, UserActivity.class);
+        intent.putExtra("userId", strUserId);
+        intent.putExtra("username", user.getUsername());
+        intent.putExtra("fullname", getString(R.string.fullName, user.getFirstname(), user.getLastname()));
+        intent.putExtra("email", user.getEmail());
+        intent.putExtra("imgPath", user.getAvatarPath());
+        startActivity(intent);
     }
 //    endregion
 
@@ -132,8 +152,8 @@ public class RankingActivity extends AppCompatActivity
         if (!gameName.endsWith("s'")) {
             gameName += "s";
         }
-        String strGameId = String.valueOf(gameId);
-        Toast.makeText(view.getContext(), "ID: " + strGameId, Toast.LENGTH_SHORT).show();
+//        String strGameId = String.valueOf(gameId);
+        Toast.makeText(view.getContext(), "GAME ID: " + gameId, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, this.getClass());
         intent.putExtra("search", "rankingGame");
         intent.putExtra("gameId", gameId);
