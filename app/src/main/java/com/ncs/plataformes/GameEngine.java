@@ -212,7 +212,7 @@ public class GameEngine {
             else if (x < 20) input.goLeft();            // LEFT
             else input.goRight();                       // RIGHT
         } else if ((y > 75) && (x > 80)) {
-            if (down) /*input.jump();*/this.statusSaver.saveStatus();                     // JUMP
+            if (down) input.jump();                     // JUMP
         } else if ((y < 20) && (x > 80)) {
             if (down) this.pause();                     // PAUSE
         } else {

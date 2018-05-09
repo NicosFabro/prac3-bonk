@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">Plataformes</string>
+
+    <string name="play">Play</string>
+    <string name="ranking">Ranking</string>
+    <string name="settings">Settings</string>
+    <string name="about">About Me</string>
+
+    <string name="gameSearch">Game Search</string>
+    <string name="rankingGame">%s Ranking</string>
+
+    <string name="username">Username</string>
+    <string name="fullName">%s %s</string>
+    <string name="position">#%d - %d</string>
+
+    <string name="id">ID</string>
+    <string name="strId">%d</string>
+    <string name="tvDefault">Lorem Ipsum</string>
+
+    <string name="aboutText">Hola %s, Error vitae. Numquam consequat or ullam quaerat.
+        Do iure ullamco laboriosam non magna numquam.
+        Est elit illum so velit but incidunt. Perspiciatis. </string>
+
+    <!--API-->
+    <string name="apiKey" translatable="false">48d256f9583d5e3a1932242f152fcbf6</string>
+    <string name="searchGameList" translatable="false">http://stucom.flx.cat/game/api/game</string>
+    <string name="searchRankingList" translatable="false">http://stucom.flx.cat/game/api/game/%d</string>
+    <string name="searchGame" translatable="false">http://stucom.flx.cat/game/api/game/%s</string>
 </resources>
