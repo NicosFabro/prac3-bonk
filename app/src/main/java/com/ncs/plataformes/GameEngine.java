@@ -16,6 +16,8 @@ import android.view.MotionEvent;
 import com.ncs.plataformes.characters.Bonk;
 import com.ncs.plataformes.characters.Boost;
 import com.ncs.plataformes.characters.Coin;
+import com.ncs.plataformes.tasks.ApiFlxService;
+import com.ncs.plataformes.tasks.ApiUtils;
 import com.ncs.plataformes.utils.StatusSaver;
 
 import org.json.JSONArray;
@@ -24,6 +26,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GameEngine {
 
@@ -416,14 +422,53 @@ public class GameEngine {
 
     private void showWinDialog() {
         dialogBuilder.setTitle("YOU WIN")
-                .setMessage("Click to change map.")
+                .setMessage("Click \"Next map\" to continue. Click \"Upload score\" to upload score.")
                 .setNegativeButton("Next map", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         changeMap();
                         start();
                     }
+                })
+                .setPositiveButton("Upload score", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        sendScore();
+                    }
                 }).show();
+    }
+
+    public void sendScore() {
+        ApiFlxService apiFlxService = ApiUtils.getApiFlxService();
+        apiFlxService.scoreUpdate(context.getResources().getString(R.string.apiKey), bonk.getScore()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                dialogBuilder = new AlertDialog.Builder(context);
+                dialogBuilder.setTitle("Score updated")
+                        .setMessage("Click to continue")
+                        .setPositiveButton("Next map", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                changeMap();
+                                start();
+                            }
+                        }).show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                dialogBuilder = new AlertDialog.Builder(context);
+                dialogBuilder.setTitle("Error updating score")
+                        .setMessage("Click to continue")
+                        .setPositiveButton("Next map", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                changeMap();
+                                start();
+                            }
+                        }).show();
+            }
+        });
     }
 
     public void boost() {
@@ -450,7 +495,7 @@ public class GameEngine {
     };
 
     void onResume() {
-        SharedPreferences sharedPref = context.getSharedPreferences("statusData", Context.MODE_PRIVATE);;
+        SharedPreferences sharedPref = context.getSharedPreferences("statusData", Context.MODE_PRIVATE);
         String bonkStatus = sharedPref.getString("bonkStatus", "-1");
         Log.d("ncs", "onResume: Bonk Status: " + bonkStatus);
 

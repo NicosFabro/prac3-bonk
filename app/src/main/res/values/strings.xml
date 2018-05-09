@@ -29,4 +29,5 @@
     <string name="searchRankingList" translatable="false">http://stucom.flx.cat/game/api/game/%d</string>
     <string name="searchUser" translatable="false">http://stucom.flx.cat/game/api/user/%d</string>
     <string name="searchGame" translatable="false">http://stucom.flx.cat/game/api/game/%s</string>
+    <string name="postScore" translatable="false">http://stucom.flx.cat/game/api/score/</string>
 </resources>
