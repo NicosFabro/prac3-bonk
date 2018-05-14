@@ -42,16 +42,14 @@ public class Bonk extends Character {
     private static final int COL_WIDTH = 20;
     private static final int COL_HEIGHT = 32;
 
-    private int score;
-    private int lives;
+    private static int score = 0;
+    private static int lives = 3;
 
     private boolean isDead;
 
     public Bonk(GameEngine gameEngine, int x, int y) {
         super(gameEngine, x, y);
         this.reset(x, y);
-        score = 0;
-        lives = 3;
     }
 
     private void reset(int x, int y) {
@@ -69,6 +67,7 @@ public class Bonk extends Character {
     public void die() {
         changeState(3);
         isDead = true;
+        --lives;
     }
 
     public boolean isDead() {
@@ -218,9 +217,5 @@ public class Bonk extends Character {
 
     public void setLives(int lives) {
         this.lives = lives;
-    }
-
-    public void lessLives() {
-        --this.lives;
     }
 }

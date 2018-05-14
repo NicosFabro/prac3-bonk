@@ -161,7 +161,6 @@ public class GameEngine {
         }
     }
 
-    // For activity start
     void start() {
         audio.startMusic();
         physics(delta);
@@ -172,7 +171,6 @@ public class GameEngine {
         bonk.setLives(3);
     }
 
-    // For activity stop
     void stop() {
         audio.stopMusic();
         physics(0);
@@ -180,7 +178,6 @@ public class GameEngine {
 //        isPause = true;
     }
 
-    // For activity pause
     void pause() {
         audio.stopMusic();
         physics(0);
@@ -188,7 +185,6 @@ public class GameEngine {
         isPause = true;
     }
 
-    // For activity resume
     void resume() {
         audio.startMusic();
         physics(delta);
@@ -554,6 +550,7 @@ public class GameEngine {
 
     void onDestroy() {
         this.statusSaver.saveStatus();
-        this.audio.stopMusic();
+        audio.stopMusic();
+        physics(0);
     }
 }

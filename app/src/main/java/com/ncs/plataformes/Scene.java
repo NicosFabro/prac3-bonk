@@ -224,7 +224,6 @@ public class Scene {
                 if (bonkRect.intersect(enemy.getCollisionRect())) {
                     gameEngine.getAudio().die();
                     bonk.die();
-                    bonk.lessLives();
                     Log.d("ncs", "Lives: " + bonk.getLives());
                 }
             }

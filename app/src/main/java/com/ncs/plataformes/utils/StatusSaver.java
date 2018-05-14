@@ -67,7 +67,6 @@ public class StatusSaver {
         Scene scene = this.gameEngine.getScene();
         List<Coin> coins = scene.getCoins();
         List<Boost> boosts = scene.getBoosts();
-        Log.d("ncs", "setSceneStatusData: boost" + boosts.get(0));
 
         JSONArray jsonCoins = new JSONArray();
         JSONArray jsonBoosts = new JSONArray();
